@@ -33,7 +33,21 @@
 -- INSERT INTO MarcaTarjeta (Nombre) VALUES ('VISA');
 -- INSERT INTO MarcaTarjeta (Nombre) VALUES ('American Express');
 
+-- Tipos de cliente
+-- - Classic
+-- - Gold
+-- - Black
+-- Tipos de cuenta
+-- - Caja de ahorro en peso
+-- - Caja de ahorro en dólares
+-- - Cuenta Corriente en pesos
+-- - Cuenta Corriente en dólare
+-- - Cuenta Inversión
 
+-- tarjetas
+-- MASTER
+-- VISA
+-- AMERICAN
 
 CREATE TABLE tarjeta (
     Numero TEXT NOT NULL,
@@ -48,23 +62,22 @@ CREATE TABLE tarjeta (
 ALTER TABLE cliente
 ADD COLUMN TipoCliente INTEGER;
 
+
 -- Establecer las relaciones entre cliente y TipoCliente
 UPDATE cliente
 SET TipoCliente = (
     SELECT ID
     FROM TipoCliente
-    WHERE Nombre = 'Classic'  -- Puedes ajustar esto según el tipo de cliente de cada cliente
+    WHERE Nombre = 'Classic'  
 );
 
--- Puedes repetir el proceso para los demás clientes y tipos de cliente
--- Ejemplo para el cliente 'María' con tipo 'Gold'
 UPDATE cliente
 SET TipoCliente = (
     SELECT ID
     FROM TipoCliente
     WHERE Nombre = 'Gold'
 )
-WHERE Nombre = 'María';
+-- WHERE Nombre = ; aca falta la condicion bajo la cual cada cliente es el que es
 
 -- Agregar la columna "TipoCuenta" en la tabla "cuenta"
 ALTER TABLE cuenta
@@ -84,26 +97,31 @@ SET TipoCuenta = (
     FROM TipoCuenta
     WHERE Nombre = 'Caja de ahorro en dólares'
 )
-WHERE ...;  -- Agregar las condiciones para identificar las cuentas apropiadas
+WHERE ...;  --  aca falta la condicion bajo la cual cada cliente es el que es
 
 -- Agregar la columna "MarcaTarjeta" en la tabla "tarjeta"
 ALTER TABLE tarjeta
 ADD COLUMN MarcaTarjeta INTEGER;
+
+ALTER TABLE Tarjeta
+ADD FOREIGN KEY (TipoCuentaID) REFERENCES TipoCuenta(TipoCuentaID);
+
+ALTER TABLE Tarjeta
+ADD FOREIGN KEY (TipoClienteID) REFERENCES TipoCliente(TipoClienteID);
 
 -- Establecer las relaciones entre tarjeta y MarcaTarjeta
 UPDATE tarjeta
 SET MarcaTarjeta = (
     SELECT ID
     FROM MarcaTarjeta
-    WHERE Nombre = 'Mastercard'  -- Ajusta esto según la marca de cada tarjeta
+    WHERE Nombre = 'Mastercard'  
 );
 
--- Puedes repetir el proceso para las demás tarjetas y marcas de tarjeta
--- Ejemplo para una tarjeta con marca 'VISA'
+
 UPDATE tarjeta
 SET MarcaTarjeta = (
     SELECT ID
     FROM MarcaTarjeta
     WHERE Nombre = 'VISA'
 )
-WHERE ...;  -- Agrega las condiciones para identificar las tarjetas apropiadas
+WHERE ...; -- aca falta la condicion bajo la cual cada cliente es el que es
