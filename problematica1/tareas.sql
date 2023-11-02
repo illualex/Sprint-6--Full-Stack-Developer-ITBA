@@ -84,8 +84,8 @@ CREATE TABLE tarjeta (
     TipoTarjeta TEXT,
     CONSTRAINT chk_numero_length CHECK (LENGTH(Numero) >= 16 AND LENGTH(Numero) <= 20)
 );
-    -- ALTER TABLE tarjeta
-    -- ADD COLUMN tarjeta_id INTEGER;
+    ALTER TABLE tarjeta
+    DROP  COLUMN ID ;
 
     ALTER TABLE tarjeta
     ADD COLUMN customer_id INTEGER
