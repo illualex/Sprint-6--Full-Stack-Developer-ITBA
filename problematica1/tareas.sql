@@ -76,6 +76,7 @@ WHERE ...; -- aca falta la condicion bajo la cual cada cliente es el que es
         -- Fecha de expiración. Almacenar si es una tarjeta de crédito o débito.
 
 CREATE TABLE tarjeta (
+    tarjeta_id ID
     Numero TEXT NOT NULL,
     CVV INTEGER,
     FechaOtorgamiento DATE,
@@ -83,6 +84,12 @@ CREATE TABLE tarjeta (
     TipoTarjeta TEXT,
     CONSTRAINT chk_numero_length CHECK (LENGTH(Numero) >= 16 AND LENGTH(Numero) <= 20)
 );
+    -- ALTER TABLE tarjeta
+    -- ADD COLUMN tarjeta_id INTEGER;
+
+    ALTER TABLE tarjeta
+    ADD COLUMN customer_id INTEGER
+    ADD FOREIGN KEY (customer_id) REFERENCES cliente(customer_id);
 
 -- Relacionar las tarjetas con la tabla donde se guardan las marcas de tarjeta.
 -- Relacionar las tarjetas con el cliente al que pertenecen.
