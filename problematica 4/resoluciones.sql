@@ -4,23 +4,34 @@
 -- LEFT JOIN cliente ON sucursal.branch_id = cliente.branch_id
 -- GROUP BY NombreSucursal
 -- ORDER BY CantidadDeClientes DESC;
-SELECT s.branch_name AS sucursal, COUNT(c.customer_id) AS CantidadDeClientes
+SELECT branch_name, COUNT(customer_id) AS cant_clientes
 FROM sucursal s
 LEFT JOIN cliente c ON s.branch_id = c.branch_id
-GROUP BY sucursal
-ORDER BY CantidadDeClientes DESC;
+GROUP BY s.branch_name
+ORDER BY cant_clientes DESC;
 
 
 -- Obtener la cantidad de empleados por cliente por sucursal en un número real.
-SELECT s.branch_name AS sucursal, CONCAT(c.customer_name, ' ', c.customer_surname) AS NombreCliente, COUNT(e.employee_id) AS CantidadEmpleados
+
+-- SELECT branch_name,customer_name,costumer_surname, CAST(COUNT(employee_id) AS REAL)
+-- from sucursal as s
+-- INNER JOIN cliente AS c ON s.branch_id = c.branch_id
+-- INNER JOIN empleado as e ON s.branch_id= e.branch_id
+-- GROUP BY branch_name, customer_name;
+
+SELECT
+  s.branch_name AS Sucursal,
+  COUNT(DISTINCT e.employee_id) AS CantidadEmpleadosPorSucursal,
+  COUNT(DISTINCT c.customer_id) AS CantidadClientesPorSucursal,
+  COUNT(DISTINCT c.customer_id) / COUNT(DISTINCT e.employee_id) AS CantidadClientesPorSucursalDivididoPorEmpleados
 FROM sucursal s
-INNER JOIN cliente c ON s.branch_id = c.branch_id
-LEFT JOIN empleado e ON c.customer_id = e.customer_id
-GROUP BY sucursal, NombreCliente;
+LEFT JOIN cliente c ON s.branch_id = c.branch_id
+LEFT JOIN empleado e ON s.branch_id = e.branch_id
+GROUP BY s.branch_name;
 
 
 -- Obtener la cantidad de tarjetas de crédito por tipo por sucursal.
-SELECT s.branch_name AS Sucursal, t.tipoTarjeta AS TipoTarjeta, COUNT(t.Numero) AS CantidadTarjetas
+SELECT branch_name AS Sucursal, t.tipoTarjeta AS TipoTarjeta, COUNT(t.Numero) AS CantidadTarjetas
 FROM sucursal s
 INNER JOIN cliente c ON s.branch_id = c.branch_id
 LEFT JOIN tarjeta t ON c.customer_id = t.customer_id
@@ -51,11 +62,11 @@ CREATE TABLE auditoria_cuenta (
     old_type TEXT,
     new_type TEXT,
     user_action TEXT,
-    created_at DATETIME
+    created_at TIMESTAMP DEFAULT(DATETIME())
 );
 
 -- Crear un trigger que, después de actualizar en la tabla "cuentas" los campos balance, IBAN o tipo de cuenta, registre en la tabla "auditoria".
-CREATE TRIGGER auditoria_cuenta_trigger_after_update
+CREATE TRIGGER IF NOT EXISTS auditoria_cuenta_trigger_after_update
 AFTER UPDATE ON cuenta
 BEGIN
     INSERT INTO auditoria_cuenta (old_id, new_id, old_balance, new_balance, old_iban, new_iban, old_type, new_type, user_action, created_at)
@@ -63,37 +74,53 @@ BEGIN
 END;
 
 -- Restar $100 a las cuentas 10, 11, 12, 13, 14.
+SELECT * FROM cuenta;
 UPDATE cuenta
-SET balance = balance - 100
+SET balance = balance - 10000
 WHERE account_id IN (10, 11, 12, 13, 14);
+SELECT * FROM cuenta;
 
 -- Mediante índices, mejorar el rendimiento de la búsqueda de clientes por DNI.
-CREATE INDEX idx_cliente_dni ON cliente (customer_dni);
+SELECT costumer_DNI, customer_name,customer_surname from cliente
+ORDER BY costumer_DNI ASC;
+
+CREATE INDEX idx_cliente_dni ON cliente (costumer_DNI);
+
+EXPLAIN CREATE INDEX idx_cliente_dni ON cliente (costumer_DNI);
+
 
 -- Crear la tabla "movimientos" con los campos de identificación del movimiento, número de cuenta, monto, tipo de operación y hora.
 CREATE TABLE movimientos (
-    movimiento_id INTEGER PRIMARY KEY,
+    movimiento_id INTEGER PRIMARY KEY AUTOINCREMENT,
     numero_cuenta INTEGER,
     monto REAL,
-    tipo_operacion TEXT,
-    hora DATETIME
+    tipo_operacion VARCHAR(50),
+    hora TIMESTAMP DEFAULT (DATETIME())
 );
 
 -- Mediante el uso de transacciones, hacer una transferencia de $1000 desde la cuenta 200 a la cuenta 400, registrar el movimiento en la tabla "movimientos" y, en caso de no poder realizar la operación de forma completa, realizar un ROLLBACK.
-BEGIN;
+BEGIN TRANSACTION;
 
 INSERT INTO movimientos (numero_cuenta, monto, tipo_operacion, hora)
-VALUES (200, -1000, 'Transferencia', DATETIME('now'));
+VALUES (200, -100000, 'Transferencia', DATETIME('now'));
+
+SELECT * FROM cuenta
+WHERE account_id = 200 OR account_id = 400;
+
 
 UPDATE cuenta
-SET balance = balance - 1000
+SET balance = balance - 100000
 WHERE account_id = 200;
 
+
 INSERT INTO movimientos (numero_cuenta, monto, tipo_operacion, hora)
-VALUES (400, 1000, 'Transferencia', DATETIME('now'));
+VALUES (400, 100000, 'Transferencia', DATETIME('now'));
 
 UPDATE cuenta
-SET balance = balance + 1000
+SET balance = balance + 100000
 WHERE account_id = 400;
+
+SELECT * FROM cuenta
+WHERE account_id = 200 OR account_id = 400;
 
 COMMIT;
