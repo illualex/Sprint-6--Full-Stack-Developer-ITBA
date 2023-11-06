@@ -21,9 +21,9 @@ ORDER BY cant_clientes DESC;
 
 SELECT
   s.branch_name AS Sucursal,
-  COUNT(DISTINCT e.employee_id) AS CantidadEmpleadosPorSucursal,
-  COUNT(DISTINCT c.customer_id) AS CantidadClientesPorSucursal,
-  COUNT(DISTINCT c.customer_id) / COUNT(DISTINCT e.employee_id) AS CantidadClientesPorSucursalDivididoPorEmpleados
+  COUNT(DISTINCT e.employee_id) AS EmpleadosPorSucursal,
+  COUNT(DISTINCT c.customer_id) AS ClientesPorSucursal,
+  COUNT(DISTINCT e.employee_id) / COUNT(DISTINCT c.customer_id) AS CantidadClientesDivididoPorEmpleadosPorSucursal
 FROM sucursal s
 LEFT JOIN cliente c ON s.branch_id = c.branch_id
 LEFT JOIN empleado e ON s.branch_id = e.branch_id
@@ -81,12 +81,12 @@ WHERE account_id IN (10, 11, 12, 13, 14);
 SELECT * FROM cuenta;
 
 -- Mediante índices, mejorar el rendimiento de la búsqueda de clientes por DNI.
-SELECT costumer_DNI, customer_name,customer_surname from cliente
-ORDER BY costumer_DNI ASC;
+SELECT customer_DNI, customer_name,customer_surname from cliente
+ORDER BY customer_DNI ASC;
 
-CREATE INDEX idx_cliente_dni ON cliente (costumer_DNI);
+CREATE INDEX idx_cliente_dni ON cliente (customer_DNI);
 
-EXPLAIN CREATE INDEX idx_cliente_dni ON cliente (costumer_DNI);
+EXPLAIN CREATE INDEX idx_cliente_dni ON cliente (customer_DNI);
 
 
 -- Crear la tabla "movimientos" con los campos de identificación del movimiento, número de cuenta, monto, tipo de operación y hora.
