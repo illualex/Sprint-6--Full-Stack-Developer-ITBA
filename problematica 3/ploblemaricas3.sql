@@ -1,6 +1,6 @@
 -- balance menor a 0
 SELECT * FROM cuenta
-    WHERE balance < 0
+    WHERE balance < 0;
 
 -- tengan en elapellido la letra Z
 SELECT customer_name, customer_surname, dob FROM cliente
@@ -9,7 +9,7 @@ SELECT customer_name, customer_surname, dob FROM cliente
 -- personas cuyo nombre sea “Brendan”
 SELECT customer_name, customer_surname, dob, branch_name 
 FROM cliente, sucursal
-WHERE customer_name = "Brendan"
+WHERE customer_name = "Brendan";
 
 --importe mayora $80.000
 SELECT c.customer_name, c.customer_surname, c.dob, s.branch_name
@@ -18,7 +18,13 @@ JOIN sucursal s ON c.branch_id = s.branch_id
 WHERE c.customer_name = 'Brendan'
 ORDER BY s.branch_name;
 
---! falta uno
+SELECT *
+FROM prestamo
+WHERE loan_total > 8000000
+UNION
+SELECT *
+FROM prestamo
+WHERE loan_type = 'prendario';
 
 --prestamos cuyo importe sea mayor que el importe medio
 SELECT *
@@ -36,7 +42,7 @@ WHERE strftime('%Y', 'now') - strftime('%Y', dob) - (strftime('%m-%d', 'now') < 
 SELECT customer_id ,balance 
 FROM cuenta
 WHERE balance > 8000 
-LIMIT 5
+LIMIT 5;
 
 -- préstamos que tengan fecha en abril, junio y agosto,ordenándolos por importe
 SELECT *
